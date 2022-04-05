@@ -106,13 +106,19 @@
                         <% } %>
                     </form> 
                    <section>
-                       <form action="/<%= task.id %>/update" method="post" style="display: inline;">
-                           <button  type="submit"  >
-                               <i class="fa-solid fa-pen"></i>
-                           </button>
+                       <form action="/<%= task.id %>/update"  method="post" style="display: inline;">
+                            <% if(task.status === 'done') {%>
+                                <button  type="submit" disabled>
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                            <% } else { %>
+                                <button  type="submit" >
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                            <% } %>    
                        </form>
                        <form action="/<%= task.id %>/delete" method="post" style="display: inline;">
-                           <button type="submit"> 
+                           <button type="submit" > 
                                <i class="fa-solid fa-trash-can"></i>
                            </button>
                        </form>
