@@ -61,13 +61,20 @@ app.post('/:id/delete',(req,res)=>{
     const updatedTasks = tasks.filter(task => task.id !== Number(req.params.id) )
 
     console.log(updatedTasks)
-    tasks = updatedTasks.map((task,index)=> {
-        return {
-            id:index,
-            task:task.task,
-            status:task.status
-        }
-    })
+    if(updatedTasks.length>0){
+        tasks = updatedTasks.map((task,index)=> {
+            return {
+                id:index,
+                task:task.task,
+                status:task.status
+            }
+        })
+        count=tasks.length
+    }else{
+        tasks=[]
+        count=0
+    }
+    console.log(tasks)
     res.redirect('/')
 })
 app.post('/:id/done',(req,res)=>{
