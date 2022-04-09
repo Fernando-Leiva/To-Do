@@ -8,7 +8,7 @@ const port = 3000
 let tasks = []
 let count = 0
 let done = false
-let index = undefined
+let aboutToUpdate = undefined
 let updatedId = undefined
 
 app.use(cors())
@@ -21,7 +21,11 @@ app.use(express.urlencoded({limit: '50mb', extended: true}));
 app.set("view engine", "ejs");
 
 app.get('/',(req, res)=>{
-    res.render('index',{ tasks:tasks, taskToUpdate:undefined, index:undefined})
+     res.render('index',{ tasks:tasks, taskToUpdate:undefined, index:undefined}) 
+    //res.render('index')
+})
+app.get('/getAll',(req,res)=>{
+    res.json({tasks:tasks})
 })
 app.post('/task',(req,res)=>{
     const description = req.body.task
@@ -32,36 +36,43 @@ app.post('/task',(req,res)=>{
     }
     tasks.push(task)
     count = count + 1
-
-    res.redirect('/')
-    //res.render('index',{ tasks })
+    console.log(tasks)
+    res.json({task:task})
 })
-app.post('/:id/task',(req,res)=>{
- 
-    const id = req.params.id
-    const description = req.body.task
-    console.log(tasks[id])
-    tasks[id].task = description
+app.put('/update',(req,res)=>{
+    const task = req.body.task
+    const id = aboutToUpdate
+    aboutToUpdate=undefined
+    const updatingTask = tasks.find(task => task.id === id)  
+    console.log(updatingTask)
+    for (let task of tasks) {
+        if(task.id === id){
+            task.task = req.body.task.description
+        }
+    }
+    //task = task.description
     console.log(tasks)
     updatedId = undefined
-
-    res.redirect('/')
+    res.json({task:updatingTask})
 
 })
-app.post('/:id/update',(req,res)=>{
-   
-    updatedId = Number(req.params.id)
-    const updatingTask = tasks.find(task => task.id === Number(req.params.id))
+app.post('/edit',(req,res)=>{
+    updatedId = Number(req.body.id)
+    aboutToUpdate = updatedId
+    console.log(tasks)
+    console.log("edit",updatedId)
+    const updatingTask = tasks.find(task => task.id === updatedId)
     console.log('updatingTaks',updatingTask)
     const task = updatingTask.task
-    res.render('index',{tasks:tasks, taskToUpdate:task,index:updatingTask.id})
+    res.json({task:task})
+    /* res.render('index',{tasks:tasks, taskToUpdate:task,index:updatingTask.id}) */
 })
-app.post('/:id/delete',(req,res)=>{
-    console.log(req.params.id)
-    const updatedTasks = tasks.filter(task => task.id !== Number(req.params.id) )
-
+app.delete('/delete',(req,res)=>{
+    console.log(req.body)
+    const deletedTask = tasks.find(task => task.id === Number(req.body.id))
+    const updatedTasks = tasks.filter(task => task.id !== Number(req.body.id) )
     console.log(updatedTasks)
-    if(updatedTasks.length>0){
+  /*   if(updatedTasks.length>0){
         tasks = updatedTasks.map((task,index)=> {
             return {
                 id:index,
@@ -73,17 +84,22 @@ app.post('/:id/delete',(req,res)=>{
     }else{
         tasks=[]
         count=0
-    }
-    console.log(tasks)
-    res.redirect('/')
+    } */
+    tasks=updatedTasks
+    console.log("After delete",tasks)
+    res.json({task:deletedTask})
 })
-app.post('/:id/done',(req,res)=>{
-    if( tasks[req.params.id].status === "pending"){
-        tasks[req.params.id].status = 'done'
+app.put('/done',(req,res)=>{
+    const id = Number(req.body.id)
+    const updatingTask = tasks.find(task => task.id === id)  
+    console.log(updatingTask)
+    
+    if( updatingTask.status === "pending"){
+        updatingTask.status = 'done'
     }else{
-        tasks[req.params.id].status = 'pending'
+        updatingTask.status = 'pending'
     }
-    res.redirect('/')
+    res.json({task:updatingTask})
 })
 
 app.listen(3000,()=>{
